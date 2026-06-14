@@ -36,14 +36,15 @@ export default function DataRoomPage() {
     setLoadingDocs(true);
     try {
       const res = await fetch("/api/documents");
-      const data = await res.json();
+      let data: { documents?: Document[]; error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON body */ }
       if (!res.ok) {
-        setError(data.error ?? "Failed to load documents.");
+        setError(data.error ?? `Server error (${res.status})`);
         return;
       }
       setDocuments(data.documents ?? []);
     } catch {
-      setError("Failed to load documents.");
+      setError("Network error. Please try again.");
     } finally {
       setLoadingDocs(false);
     }

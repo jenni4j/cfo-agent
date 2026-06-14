@@ -3,24 +3,30 @@ import { createClient } from "@/lib/supabase/server";
 import { extractPdfText, chunkText, storeChunks } from "@/lib/rag";
 
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: documents, error } = await supabase
+      .from("documents")
+      .select("id, name, file_size, created_at")
+      .eq("company_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ documents });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error("[GET /api/documents]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const { data: documents, error } = await supabase
-    .from("documents")
-    .select("id, name, file_size, created_at")
-    .eq("company_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ documents });
 }
 
 export async function POST(req: NextRequest) {
