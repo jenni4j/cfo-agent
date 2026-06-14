@@ -1,10 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { PDFParse } from "pdf-parse";
 
 const CHUNK_SIZE = 600;
 const CHUNK_OVERLAP = 80;
 
 export async function extractPdfText(buffer: Buffer): Promise<string> {
+  const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: buffer });
   const result = await parser.getText();
   await parser.destroy();
