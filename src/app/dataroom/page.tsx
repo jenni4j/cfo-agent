@@ -37,6 +37,10 @@ export default function DataRoomPage() {
     try {
       const res = await fetch("/api/documents");
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Failed to load documents.");
+        return;
+      }
       setDocuments(data.documents ?? []);
     } catch {
       setError("Failed to load documents.");
