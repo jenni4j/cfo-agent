@@ -4,7 +4,7 @@ An AI-powered financial intelligence assistant that lets companies chat with the
 
 ## Demo
 
-[![CFO Agent Demo](https://cdn.loom.com/sessions/thumbnails/35ef1bb71ff540d9ba6c8722271cb16d-with-play.gif)](https://www.loom.com/share/35ef1bb71ff540d9ba6c8722271cb16d)
+[CFO Agent Demo](https://www.loom.com/share/35ef1bb71ff540d9ba6c8722271cb16d)
 
 ## Features
 
