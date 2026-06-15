@@ -3,7 +3,27 @@ import { SupabaseClient } from "@supabase/supabase-js";
 const CHUNK_SIZE = 600;
 const CHUNK_OVERLAP = 80;
 
+let pdfGlobalsReady = false;
+
+// pdf-parse wraps pdfjs-dist. In Vercel's production build, serverExternalPackages
+// makes Turbopack load pdf-parse's ESM build, whose worker runs `new DOMMatrix()`
+// at module-load time and provides NO polyfill (only the CJS build self-polyfills).
+// Supply the browser globals from @napi-rs/canvas before importing so it doesn't
+// throw "DOMMatrix is not defined" the instant pdf-parse is imported.
+async function ensurePdfGlobals(): Promise<void> {
+  if (pdfGlobalsReady) return;
+  const g = globalThis as Record<string, unknown>;
+  if (typeof g.DOMMatrix === "undefined") {
+    const canvas = await import("@napi-rs/canvas");
+    g.DOMMatrix = canvas.DOMMatrix;
+    g.ImageData = canvas.ImageData;
+    g.Path2D = canvas.Path2D;
+  }
+  pdfGlobalsReady = true;
+}
+
 export async function extractPdfText(buffer: Buffer): Promise<string> {
+  await ensurePdfGlobals();
   const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: buffer });
   const result = await parser.getText();
